@@ -1,0 +1,7 @@
+package com.papeleria.cipe.repository;
+
+import com.papeleria.cipe.model.Proveedor;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProveedorRepository extends JpaRepository<Proveedor, Integer> {
+}

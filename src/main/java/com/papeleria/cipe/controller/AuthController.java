@@ -116,4 +116,34 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioRepository.save(nuevo));
     }
+
+    // Restablecer contraseña (solo Administrador)
+    @PutMapping("/usuarios/{id}/password")
+    public ResponseEntity<?> resetPassword(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> payload) {
+        String nuevaPass = payload.getOrDefault("password", "").trim();
+        if (nuevaPass.length() < 4) {
+            return ResponseEntity.badRequest()
+                    .body("La nueva contraseña debe tener al menos 4 caracteres");
+        }
+
+        return usuarioRepository.findById(id).map(usuario -> {
+            usuario.setPassword(passwordEncoder.encode(nuevaPass));
+            usuarioRepository.save(usuario);
+            return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada correctamente"));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Activar o desactivar acceso de un usuario
+    @PutMapping("/usuarios/{id}/estado")
+    public ResponseEntity<?> cambiarEstadoUsuario(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Boolean> payload) {
+        return usuarioRepository.findById(id).map(usuario -> {
+            Boolean activo = payload.getOrDefault("activo", true);
+            usuario.setActivo(activo);
+            return ResponseEntity.ok(usuarioRepository.save(usuario));
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }
